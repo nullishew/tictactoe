@@ -2,14 +2,56 @@ package tictactoe;
 
 public class TicTacToe {
   public static final int FULL_POSITION = 0b111111111;
+  public static final int[] WIN_MASKS = {
+      0b000000111, // row 1 _
+      0b000111000, // row 2 _
+      0b111000000, // row 3 _
+      0b001001001, // col 1 |
+      0b010010010, // col 2 |
+      0b100100100, // col 3 |
+      0b001010100, // diagonal 1 /
+      0b100010001, // diagonal 2 \
+  };
+
   private int[] playerPositions;
   private int totalTurns;
   private int playerTurn;
 
-  public TicTacToe() {
-    playerPositions = new int[] { 0b000000000, 0b000000000 };
+  public TicTacToe() throws InvalidBoardException {
+    this(0, 0);
+  }
+
+  // the bitboards can start at any number, but only the first 9 bits are relevant
+  public TicTacToe(int playerPosition0, int playerPosition1) throws InvalidBoardException {
+    if (!isValidPosition(playerPosition0, playerPosition1)) {
+      throw new InvalidBoardException("The starting TicTacToe position is not valid");
+    }
+    playerPositions = new int[] { playerPosition0, playerPosition1 };
     totalTurns = 0;
     playerTurn = 0;
+  }
+
+  public static boolean isValidPosition(int playerPosition0, int playerPosition1) {
+    int[] positions = new int[] { playerPosition0, playerPosition1 };
+    for (int pos : positions) {
+      if (pos < 0 || pos > FULL_POSITION) {
+        return false;// number is too large or small to represent tictactoe board
+      }
+    }
+
+    int[] turns = new int[] { Integer.bitCount(playerPosition0), Integer.bitCount(playerPosition1) };
+    if (turns[0] < turns[1]) {
+      return false; // player 1 has skipped player 0's turn at least once
+    }
+    if (turns[1] + 1 < turns[0]) {
+      return false; // player 0 has skipped player 1's turn at least once
+    }
+
+    if ((playerPosition0 & playerPosition1) != 0) {
+      return false; // overlap found
+    }
+
+    return true; // no issues found
   }
 
   public int getPlayerPosition(int playerId) {
@@ -47,6 +89,18 @@ public class TicTacToe {
     }
     playerPositions[playerId] ^= cellMask;
     return true;
+  }
+
+  public boolean isWin(int playerId) {
+    if (!isValidPlayer(playerId)) {
+      return false;
+    }
+    for (int mask : WIN_MASKS) {
+      if ((playerPositions[playerId] & mask) == mask) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

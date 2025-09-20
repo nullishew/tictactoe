@@ -1,19 +1,51 @@
 package tictactoe;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 import org.junit.Test;
 
 public class TicTacToeTest {
   @Test(timeout = 10000)
-  public void testTicTacToeInitialization() {
+  public void testTicTacToeInitialization() throws InvalidBoardException {
     TicTacToe ticTacToe = new TicTacToe();
-    assertEquals(ticTacToe.getPlayerPosition(0), 0);
-    assertEquals(ticTacToe.getPlayerPosition(1), 0);
+    assertEquals(0, ticTacToe.getPlayerPosition(0));
+    assertEquals(0, ticTacToe.getPlayerPosition(1));
+    assertEquals(0, ticTacToe.getPlayerTurn());
+    assertEquals(0, ticTacToe.getTotalTurns());
+
+    for (int i = 0; i <= TicTacToe.FULL_POSITION; i++) {
+    }
+
+    int invalidPositions[][] = new int[][] {
+        { 999999999, 99999999 }, // number out of bounds
+        { -1, 0 }, // number out of bounds
+        { 0b000001000, 0b000001000 }, // overlap
+        { 0b000000100, 0b000011000 }, // player 1 has more moves than player 0
+        { 0b0000001111, 0b000000000 }, // player 0 has more moves than player 1
+        { 0b1000000000, 0b000000100 },
+        { 0b1111111110, 0b000000000 },
+        { 0b000010000, 0b000010000 },
+        { 0b1111111111, 0b000000000 },
+        { 0b000010000, 0b000011000 },
+        { 0b000001000, 0b000001000 },
+        { 0b111111111, 0b1000000000 },
+        { 0b000000111, 0b000000011 },
+        { 0b10000000000, 0b000000000 },
+        { 0b1111111111, 0b111111111 },
+        { 0b0000000010, 0b0000000010 },
+        { 0b000001000, 0b000001001 },
+    };
+    for (int[] positions : invalidPositions) {
+      InvalidBoardException exception = assertThrows(InvalidBoardException.class, () -> {
+        new TicTacToe(positions[0], positions[1]);
+      });
+      assertEquals("The starting TicTacToe position is not valid", exception.getMessage());
+    }
   }
 
   @Test(timeout = 10000)
-  public void testIsInBounds() {
+  public void testIsInBounds() throws InvalidBoardException {
     TicTacToe ticTacToe = new TicTacToe();
     // test valid corresponding cell bitmasks
     assertEquals(true, ticTacToe.isInBounds(0));
@@ -42,7 +74,7 @@ public class TicTacToeTest {
   }
 
   @Test(timeout = 10000)
-  public void testIsValidPlayer() {
+  public void testIsValidPlayer() throws InvalidBoardException {
     TicTacToe ticTacToe = new TicTacToe();
     // test valid players (0 - 1 inclusive)
     assertEquals(true, ticTacToe.isValidPlayer(0));
@@ -58,7 +90,7 @@ public class TicTacToeTest {
   }
 
   @Test(timeout = 10000)
-  public void testTrySetCell() {
+  public void testTrySetCell() throws InvalidBoardException {
     // test placing pieces out of bounds
     TicTacToe ticTacToe = new TicTacToe();
     assertEquals(false, ticTacToe.trySetCellId(-1, 0));
@@ -123,5 +155,12 @@ public class TicTacToeTest {
       assertEquals(false, ticTacToe2.trySetCellId(cellId, 1));
       assertEquals(false, ticTacToe2.trySetCellId(cellId, 0));
     }
+  }
+
+  @Test
+  public void testIsWin() throws InvalidBoardException {
+    // tests to be added later
+    assertEquals(true, false);
+
   }
 }
