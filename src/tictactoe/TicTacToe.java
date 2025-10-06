@@ -27,8 +27,18 @@ public class TicTacToe {
       throw new InvalidBoardException("The starting TicTacToe position is not valid");
     }
     playerPositions = new int[] { playerPosition0, playerPosition1 };
-    totalTurns = 0;
-    playerTurn = 0;
+    int[] turns = new int[] { Integer.bitCount(playerPosition0), Integer.bitCount(playerPosition1) };
+    totalTurns = turns[0] + turns[1];
+    playerTurn = turns[0] > turns[1] ? 1 : 0;
+  }
+
+  public static boolean isWinningPosition(int position) {
+    for (int mask : WIN_MASKS) {
+      if ((position & mask) == mask) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static boolean isValidPosition(int playerPosition0, int playerPosition1) {
@@ -45,6 +55,13 @@ public class TicTacToe {
     }
     if (turns[1] + 1 < turns[0]) {
       return false; // player 0 has skipped player 1's turn at least once
+    }
+
+    if (isWinningPosition(playerPosition0) && turns[0] == turns[1]) {
+      return false; // player 0 has already one but player 1 has made a move after that
+    }
+    if (isWinningPosition(playerPosition1) && turns[0] == turns[1] + 1) {
+      return false; // player 1 has already one but player 0 has made a move after that
     }
 
     if ((playerPosition0 & playerPosition1) != 0) {
@@ -88,6 +105,8 @@ public class TicTacToe {
       return false;
     }
     playerPositions[playerId] ^= cellMask;
+    totalTurns++;
+    playerTurn ^= 0b1;
     return true;
   }
 
@@ -95,12 +114,26 @@ public class TicTacToe {
     if (!isValidPlayer(playerId)) {
       return false;
     }
-    for (int mask : WIN_MASKS) {
-      if ((playerPositions[playerId] & mask) == mask) {
-        return true;
-      }
+    if (!isValidPosition(playerPositions[0], playerPositions[1])) {
+      return false;
     }
-    return false;
+    return isWinningPosition(playerPositions[playerId]);
+  }
+
+  public String toString() {
+    String str = "";
+    int mask = 0b1;
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        str += ((playerPositions[0] & mask) == mask) ? "x"
+            : ((playerPositions[1] & mask) == mask) ? "o"
+                : "-";
+        str += " ";
+        mask <<= 1;
+      }
+      str += "\n";
+    }
+    return str;
   }
 
 }

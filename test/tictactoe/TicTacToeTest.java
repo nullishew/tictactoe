@@ -14,9 +14,6 @@ public class TicTacToeTest {
     assertEquals(0, ticTacToe.getPlayerTurn());
     assertEquals(0, ticTacToe.getTotalTurns());
 
-    for (int i = 0; i <= TicTacToe.FULL_POSITION; i++) {
-    }
-
     int invalidPositions[][] = new int[][] {
         { 999999999, 99999999 }, // number out of bounds
         { -1, 0 }, // number out of bounds
@@ -35,6 +32,8 @@ public class TicTacToeTest {
         { 0b1111111111, 0b111111111 },
         { 0b0000000010, 0b0000000010 },
         { 0b000001000, 0b000001001 },
+        {0b111000000, 0b000111000}, // test player 1 player move after player 0 wins
+        {0b101000101, 0b000111000}, // test player 0 plays move after player 1 wins
     };
     for (int[] positions : invalidPositions) {
       InvalidBoardException exception = assertThrows(InvalidBoardException.class, () -> {
@@ -42,6 +41,9 @@ public class TicTacToeTest {
       });
       assertEquals("The starting TicTacToe position is not valid", exception.getMessage());
     }
+
+    // test totalTurns later
+    // test playerTurn later
   }
 
   @Test(timeout = 10000)
